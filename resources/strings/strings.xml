@@ -38,7 +38,7 @@
   <string id="MenuClearQueue">Discard queued</string>
   <string id="MenuStatus">Status</string>
   <string id="Sending">Sending...</string>
-  <string id="SendOk">Delivered</string>
-  <string id="SendFailed">Failed</string>
+  <string id="SendOk" scope="glance">Delivered</string>
+  <string id="SendFailed" scope="glance">Failed</string>
   <string id="NoPhone">No phone connection</string>
 </strings>

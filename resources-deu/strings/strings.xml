@@ -40,7 +40,7 @@
   <string id="MenuClearQueue">Wartende verwerfen</string>
   <string id="MenuStatus">Status</string>
   <string id="Sending">Sende...</string>
-  <string id="SendOk">Zugestellt</string>
-  <string id="SendFailed">Fehler</string>
+  <string id="SendOk" scope="glance">Zugestellt</string>
+  <string id="SendFailed" scope="glance">Fehler</string>
   <string id="NoPhone">Keine Verbindung</string>
 </strings>
