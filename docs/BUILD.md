@@ -2,22 +2,52 @@
 
 ## 1. The SDK
 
-The Connect IQ SDK is not packaged anywhere sensible; you get it from Garmin.
+Already installed on this machine at
+`~/.Garmin/ConnectIQ/Sdks/connectiq-sdk-lin-9.2.0-2026-06-09-92a1605b2`
+(Connect IQ 9.2.0, released 9 June 2026). To put it on `PATH`:
 
-1. Sign in at <https://developer.garmin.com/connect-iq/sdk/> and download the
-   **SDK Manager** for Linux.
-2. Run it, accept the licence, and install the latest SDK plus the device
-   definitions you care about. Device definitions are downloaded per device and
-   the full set is several GB — for day-to-day work just install yours.
-3. Put the SDK's `bin` on your `PATH`:
+```bash
+. ~/.Garmin/ConnectIQ/env.sh
+```
 
-   ```bash
-   export PATH="$HOME/.Garmin/ConnectIQ/Sdks/<sdk-version>/bin:$PATH"
-   ```
+That also exports `CIQ_DEVELOPER_KEY`. Verify with `monkeyc --version`.
 
-   `monkeyc`, `monkeydo` and `connectiq` should then resolve.
+### Installing it elsewhere
 
-The SDK needs a Java runtime. `java` is already present on this machine.
+The SDK zip is a plain download, no account required. Garmin publishes the
+version list as JSON, so there is no need to go through the GUI:
+
+```bash
+curl -s https://developer.garmin.com/downloads/connect-iq/sdks/sdks.json | jq -r '.[].linux'
+curl -LO https://developer.garmin.com/downloads/connect-iq/sdks/<the-linux-zip>
+```
+
+Unzip it under `~/.Garmin/ConnectIQ/Sdks/` and `chmod +x` the `bin/`
+contents. It needs a Java runtime; Java 21 works.
+
+## 1b. Device definitions — needs a Garmin account
+
+**This is the part that cannot be automated.** The SDK ships compiler,
+simulator and docs, but *no* device definitions, and without them
+`monkeyc -d fenix7x` fails with `Invalid device id specified`.
+
+Device files come from `api.gcs.garmin.com/ciq-product-onboarding/devices`,
+which returns **401** without authentication. The SDK Manager obtains that
+token by signing in through `sso.garmin.com` and accepting the SDK
+agreement, so a human with a Garmin account has to do it once:
+
+```bash
+~/.Garmin/ConnectIQ/sdkmanager/bin/sdkmanager
+```
+
+It is a GUI application and needs a display. Sign in, accept the agreement,
+then download the devices you build for — at minimum `fenix7x`. They land
+in `~/.Garmin/ConnectIQ/Devices/`, and `monkeyc` picks them up from there
+with no further configuration.
+
+Downloading every device is several GB. For day-to-day work install only
+the ones you test on; the full set is only needed for an export build of
+all 140 targets.
 
 ## 2. Developer key
 
