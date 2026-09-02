@@ -7,6 +7,16 @@
 #   ./sim.sh run <prg> <device>   side-load a prg into the running simulator
 #   ./sim.sh logs           show simulator/app console output
 #   ./sim.sh stop
+#
+# Note: the simulator reliably accepts only ONE `run` per container lifetime.
+# Subsequent monkeydo invocations hang with no output and no error. Restart it
+# between runs when scripting tests:
+#
+#   ./sim.sh stop && ./sim.sh start && sleep 12 && ./sim.sh run ...
+#
+# Also: drive a test from a Timer after the view is up, not from onStart. A web
+# request issued during onStart is silently dropped and its callback never
+# fires, which looks identical to a hang.
 set -euo pipefail
 
 IMAGE=ciq-sdkmanager
