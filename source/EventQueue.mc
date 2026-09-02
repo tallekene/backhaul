@@ -106,48 +106,26 @@ class EventQueue {
         return load().size();
     }
 
-    //! The oldest undelivered event, or null.
-    static function peek() as Lang.Dictionary or Null {
-        var q = load();
-        if (q.size() == 0) {
-            return null;
+    //! The whole queue, oldest first, with anything expired already dropped.
+    //!
+    //! Callers take a snapshot, work through it in memory, and write back once
+    //! via replaceAll(). Re-reading between deliveries is deliberately not
+    //! offered: on device, a write made inside a web-request callback in a
+    //! background process was not visible to the next read, so a peek/pop loop
+    //! re-delivered the same event until it ran out of budget.
+    static function snapshot() as Lang.Array {
+        if (!isSupported()) {
+            return [];
         }
-        return q[0] as Lang.Dictionary;
+        return expire(load());
     }
 
-    //! Remove the oldest event, after a successful delivery or a permanent
-    //! rejection.
-    static function pop() as Void {
-        var q = load();
-        if (q.size() == 0) {
-            return;
+    //! Write back what is left. Pass an empty array to clear.
+    static function replaceAll(q as Lang.Array) as Lang.Boolean {
+        if (!isSupported()) {
+            return false;
         }
-        save(tail(q));
-    }
-
-    //! Record a failed attempt against the head, dropping it once it has burned
-    //! through MAX_ATTEMPTS.
-    static function penaliseHead() as Void {
-        var q = load();
-        if (q.size() == 0) {
-            return;
-        }
-
-        var head = q[0] as Lang.Dictionary;
-        var attempts = head["attempts"];
-        if (attempts == null) {
-            attempts = 0;
-        }
-        attempts = attempts + 1;
-
-        if (attempts >= MAX_ATTEMPTS) {
-            save(tail(q));
-            return;
-        }
-
-        head["attempts"] = attempts;
-        q[0] = head;
-        save(q);
+        return save(q);
     }
 
     static function clear() as Void {

@@ -29,6 +29,12 @@ class Dispatcher {
     hidden var mDelivered as Lang.Number;
     hidden var mLastCode  as Lang.Number;
 
+    //! Snapshot of the queue for this run, plus how far through it we are.
+    //! Held in memory rather than re-read between deliveries - see
+    //! EventQueue.snapshot() for why.
+    hidden var mPending as Lang.Array or Null;
+    hidden var mIndex   as Lang.Number;
+
     //! @param onDone Called once when this run is finished, with no arguments.
     //!               In the background that is Background.exit(); in the
     //!               foreground it refreshes the view.
@@ -38,6 +44,8 @@ class Dispatcher {
         mDirect    = null;
         mDelivered = 0;
         mLastCode  = 0;
+        mPending   = null;
+        mIndex     = 0;
     }
 
     //! Hand a freshly captured event to the delivery machinery.
@@ -80,23 +88,26 @@ class Dispatcher {
 
     //! Work through the backlog. Safe to call with an empty queue.
     function drain() as Void {
-        if (!isOnline()) {
-            finish();
-            return;
+        if (mPending == null) {
+            mPending = EventQueue.snapshot();
+            mIndex   = 0;
         }
-        if (mBudget <= 0) {
-            finish();
-            return;
-        }
+        sendNext();
+    }
 
-        var event = EventQueue.peek();
-        if (event == null) {
+    //! Deliver the item under the cursor, or stop if there is nothing left to
+    //! do, no connection, or no budget.
+    hidden function sendNext() as Void {
+        if (mPending == null || mIndex >= mPending.size()) {
             finish();
             return;
         }
-
+        if (!isOnline() || mBudget <= 0) {
+            finish();
+            return;
+        }
         mBudget -= 1;
-        send(event);
+        send(mPending[mIndex] as Lang.Dictionary);
     }
 
     hidden function send(event as Lang.Dictionary) as Void {
@@ -137,20 +148,26 @@ class Dispatcher {
             return;
         }
 
-        var head = EventQueue.peek();
-        EventQueue.recordResult(head == null ? "unknown" : eventType(head), code, ok);
-
-        if (ok) {
-            EventQueue.pop();
-            mDelivered += 1;
-            drain();
+        if (mPending == null || mIndex >= mPending.size()) {
+            finish();
             return;
         }
 
-        // Stop the run on the first failure rather than hammering a server that
-        // is down or a URL that is wrong. penaliseHead() counts the attempt and
-        // eventually discards an event that can never be delivered.
-        EventQueue.penaliseHead();
+        var event = mPending[mIndex] as Lang.Dictionary;
+        EventQueue.recordResult(eventType(event), code, ok);
+
+        if (ok) {
+            mDelivered += 1;
+            mIndex += 1;
+            sendNext();
+            return;
+        }
+
+        // Count the attempt against this event and stop the run, rather than
+        // hammering a server that is down or a URL that is wrong. commit()
+        // discards it once it has burned through MAX_ATTEMPTS.
+        var attempts = event["attempts"];
+        event["attempts"] = (attempts == null ? 0 : attempts) + 1;
         finish();
     }
 
@@ -199,9 +216,32 @@ class Dispatcher {
         return true;
     }
 
+    //! Persist whatever is left of the snapshot, exactly once per run, then
+    //! hand back to the caller.
     hidden function finish() as Void {
+        commit();
         if (mOnDone != null) {
             mOnDone.invoke();
         }
+    }
+
+    //! Everything from the cursor onwards survives, minus anything that has
+    //! exhausted its attempts. Delivered events are simply left behind.
+    hidden function commit() as Void {
+        if (mPending == null) {
+            return;
+        }
+
+        var keep = [];
+        for (var i = mIndex; i < mPending.size(); i += 1) {
+            var e = mPending[i] as Lang.Dictionary;
+            var a = e["attempts"];
+            if (a == null || a < EventQueue.MAX_ATTEMPTS) {
+                keep.add(e);
+            }
+        }
+
+        EventQueue.replaceAll(keep);
+        mPending = null;
     }
 }
