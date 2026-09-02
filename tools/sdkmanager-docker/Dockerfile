@@ -24,6 +24,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libcurl4 \
         libsm6 \
         libice6 \
+        libusb-1.0-0 \
+        openjdk-17-jre-headless \
     && rm -rf /var/lib/apt/lists/*
 
 # The container runs as the host user's uid so that files written into the

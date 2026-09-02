@@ -16,8 +16,12 @@ using Toybox.Time;
 //! this has to be a reconcile against the current state rather than a set of
 //! one-off calls, or a user who turns a setting off gets webhooks forever.
 //!
-//! This must run in the foreground application process. Calling it from a
-//! glance or from the background service does nothing useful.
+//! Registration only means anything in the foreground application process, but
+//! this class must still *exist* in every scope: AppBase.onStart() calls it, and
+//! the compiler compiles the entry point into the app, glance and background
+//! binaries alike. Without the annotation the symbol is absent from two of the
+//! three, and onStart() dies with "Failed invoking <symbol>".
+(:glance, :background)
 class EventRegistrar {
 
     //! Whether this device can run a background service at all. A handful of
