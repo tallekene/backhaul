@@ -40,6 +40,24 @@ agreement, so a human with a Garmin account has to do it once:
 ~/.Garmin/ConnectIQ/sdkmanager/bin/sdkmanager
 ```
 
+#### On Arch (or anywhere without webkit2gtk-4.0)
+
+The manager links `libwebkit2gtk-4.0` and `libsoup-2.4`. Arch dropped
+webkit2gtk-4.0 because it is EOL upstream, and 4.1 cannot stand in for it:
+4.1 requires libsoup-3, and libsoup-2 and libsoup-3 cannot coexist in a
+single process. Symlinking the newer library aborts at runtime rather than
+merely risking ABI drift.
+
+Run it in a container that still has the 4.0 stack instead:
+
+```bash
+./tools/sdkmanager-docker/run.sh
+```
+
+That builds an Ubuntu 22.04 image on first use, bind-mounts `~/.Garmin` so
+downloaded devices land on the host, forwards the X socket (XWayland is
+fine), and runs as your uid so the files stay yours.
+
 It is a GUI application and needs a display. Sign in, accept the agreement,
 then download the devices you build for — at minimum `fenix7x`. They land
 in `~/.Garmin/ConnectIQ/Devices/`, and `monkeyc` picks them up from there
