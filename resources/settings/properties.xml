@@ -1,0 +1,35 @@
+<properties>
+  <!-- Destination. Must be https:// for anything other than the simulator. -->
+  <property id="webhook_url" type="string"></property>
+
+  <!-- Optional bearer token. Sent as "Authorization: Bearer <token>" when set. -->
+  <property id="auth_token" type="string"></property>
+
+  <!-- Optional free-form header, e.g. "X-Api-Key" / "s3cr3t". -->
+  <property id="header_name"  type="string"></property>
+  <property id="header_value" type="string"></property>
+
+  <!-- Identifies this watch in the payload when you have more than one. -->
+  <property id="device_label" type="string"></property>
+
+  <!-- Which events fire a webhook. -->
+  <property id="ev_activity"  type="boolean">true</property>
+  <property id="ev_goal"      type="boolean">true</property>
+  <property id="ev_steps"     type="boolean">false</property>
+  <property id="ev_sleep"     type="boolean">false</property>
+  <property id="ev_wake"      type="boolean">false</property>
+  <property id="ev_heartbeat" type="boolean">false</property>
+
+  <!-- Heartbeat / queue-flush interval in minutes. Garmin's floor is 5. -->
+  <property id="heartbeat_minutes" type="number">60</property>
+
+  <!-- Payload enrichment. -->
+  <property id="include_location" type="boolean">false</property>
+  <property id="include_health"   type="boolean">true</property>
+
+  <!-- Spool events to storage when offline and retry later. -->
+  <property id="queue_enabled" type="boolean">true</property>
+
+  <!-- Master switch. Turning this off deregisters every background event. -->
+  <property id="enabled" type="boolean">true</property>
+</properties>

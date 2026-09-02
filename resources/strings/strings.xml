@@ -1,0 +1,44 @@
+<strings>
+  <string id="AppName" scope="glance">Backhaul</string>
+
+  <!-- Settings -->
+  <string id="SetEnabled">Enabled</string>
+  <string id="SetUrl">Webhook URL</string>
+  <string id="SetUrlPrompt">https://example.com/hooks/garmin</string>
+  <string id="SetAuthToken">Bearer token</string>
+  <string id="SetAuthTokenPrompt">Sent as Authorization: Bearer &lt;token&gt;. Leave blank to omit.</string>
+  <string id="SetHeaderName">Extra header name</string>
+  <string id="SetHeaderNamePrompt">e.g. X-Api-Key</string>
+  <string id="SetHeaderValue">Extra header value</string>
+  <string id="SetHeaderValuePrompt">Value for the header above</string>
+  <string id="SetDeviceLabel">Device label</string>
+  <string id="SetDeviceLabelPrompt">Name for this watch in the payload</string>
+  <string id="SetEvActivity">Send on activity finished</string>
+  <string id="SetEvGoal">Send on goal reached</string>
+  <string id="SetEvSteps">Send every 1000 steps</string>
+  <string id="SetEvSleep">Send on sleep</string>
+  <string id="SetEvWake">Send on wake</string>
+  <string id="SetEvHeartbeat">Send periodic heartbeat</string>
+  <string id="SetHeartbeatMinutes">Interval (minutes)</string>
+  <string id="SetHeartbeatMinutesPrompt">Also how often queued events are retried. Minimum 5.</string>
+  <string id="SetIncludeLocation">Include location</string>
+  <string id="SetIncludeHealth">Include steps and heart rate</string>
+  <string id="SetQueueEnabled">Queue events when offline</string>
+
+  <!-- Status view -->
+  <string id="StatusReady" scope="glance">Ready</string>
+  <string id="StatusNoUrl" scope="glance">No URL set</string>
+  <string id="StatusOff" scope="glance">Disabled</string>
+  <string id="StatusUnsupported" scope="glance">Not supported</string>
+  <string id="StatusNever" scope="glance">No events yet</string>
+  <string id="LabelQueued" scope="glance">Queued</string>
+  <string id="LabelLast" scope="glance">Last</string>
+  <string id="MenuSendTest">Send test event</string>
+  <string id="MenuFlushQueue">Retry queued now</string>
+  <string id="MenuClearQueue">Discard queued</string>
+  <string id="MenuStatus">Status</string>
+  <string id="Sending">Sending...</string>
+  <string id="SendOk">Delivered</string>
+  <string id="SendFailed">Failed</string>
+  <string id="NoPhone">No phone connection</string>
+</strings>

@@ -1,0 +1,65 @@
+<settings>
+  <setting propertyKey="@Properties.enabled" title="@Strings.SetEnabled">
+    <settingConfig type="boolean" />
+  </setting>
+
+  <setting propertyKey="@Properties.webhook_url" title="@Strings.SetUrl" prompt="@Strings.SetUrlPrompt">
+    <settingConfig type="alphaNumeric" required="true" maxLength="256" />
+  </setting>
+
+  <setting propertyKey="@Properties.auth_token" title="@Strings.SetAuthToken" prompt="@Strings.SetAuthTokenPrompt">
+    <settingConfig type="alphaNumeric" required="false" maxLength="256" />
+  </setting>
+
+  <setting propertyKey="@Properties.header_name" title="@Strings.SetHeaderName" prompt="@Strings.SetHeaderNamePrompt">
+    <settingConfig type="alphaNumeric" required="false" maxLength="64" />
+  </setting>
+
+  <setting propertyKey="@Properties.header_value" title="@Strings.SetHeaderValue" prompt="@Strings.SetHeaderValuePrompt">
+    <settingConfig type="alphaNumeric" required="false" maxLength="256" />
+  </setting>
+
+  <setting propertyKey="@Properties.device_label" title="@Strings.SetDeviceLabel" prompt="@Strings.SetDeviceLabelPrompt">
+    <settingConfig type="alphaNumeric" required="false" maxLength="32" />
+  </setting>
+
+  <setting propertyKey="@Properties.ev_activity" title="@Strings.SetEvActivity">
+    <settingConfig type="boolean" />
+  </setting>
+
+  <setting propertyKey="@Properties.ev_goal" title="@Strings.SetEvGoal">
+    <settingConfig type="boolean" />
+  </setting>
+
+  <setting propertyKey="@Properties.ev_steps" title="@Strings.SetEvSteps">
+    <settingConfig type="boolean" />
+  </setting>
+
+  <setting propertyKey="@Properties.ev_sleep" title="@Strings.SetEvSleep">
+    <settingConfig type="boolean" />
+  </setting>
+
+  <setting propertyKey="@Properties.ev_wake" title="@Strings.SetEvWake">
+    <settingConfig type="boolean" />
+  </setting>
+
+  <setting propertyKey="@Properties.ev_heartbeat" title="@Strings.SetEvHeartbeat">
+    <settingConfig type="boolean" />
+  </setting>
+
+  <setting propertyKey="@Properties.heartbeat_minutes" title="@Strings.SetHeartbeatMinutes" prompt="@Strings.SetHeartbeatMinutesPrompt">
+    <settingConfig type="numeric" min="5" max="1440" />
+  </setting>
+
+  <setting propertyKey="@Properties.include_location" title="@Strings.SetIncludeLocation">
+    <settingConfig type="boolean" />
+  </setting>
+
+  <setting propertyKey="@Properties.include_health" title="@Strings.SetIncludeHealth">
+    <settingConfig type="boolean" />
+  </setting>
+
+  <setting propertyKey="@Properties.queue_enabled" title="@Strings.SetQueueEnabled">
+    <settingConfig type="boolean" />
+  </setting>
+</settings>

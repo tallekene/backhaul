@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Backhaul launcher icon: the link from the edge back to the core.
+       An origin node and a directed trunk leaving it. Direction is the whole
+       idea of a backhaul, so the arrow carries the meaning and the mark stays
+       legible at 26px on a monochrome Instinct. -->
+  <g stroke="#ffffff" fill="none" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="24" y1="76" x2="70" y2="30" />
+    <polyline points="46,24 76,24 76,54" />
+  </g>
+  <circle cx="24" cy="76" r="10" fill="#ffffff" />
+</svg>

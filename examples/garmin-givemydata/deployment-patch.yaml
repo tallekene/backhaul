@@ -1,0 +1,58 @@
+# Third container for the garmin-givemydata pod: receives webhooks from the
+# watch and touches the trigger file the sync loop watches.
+#
+# Goes alongside the existing `sync` and `pg-sync` containers. It shares the
+# same RWO PVC, which is why it has to live in this pod rather than its own
+# Deployment.
+- name: trigger
+  image: python:3.12-alpine
+  imagePullPolicy: IfNotPresent
+  command:
+    - python3
+    - /app/receiver.py
+    - --port
+    - "8099"
+    - --on-activity
+    - touch /data/.sync-now
+  env:
+    - name: BACKHAUL_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: backhaul-token
+          key: token
+    - name: PYTHONUNBUFFERED
+      value: "1"
+  ports:
+    - name: http
+      containerPort: 8099
+  # The receiver is stdlib-only and does nothing but touch a file, so it needs
+  # very little. Keep it small so it cannot crowd out the chromium-heavy sync
+  # container on the same node.
+  resources:
+    requests:
+      memory: "32Mi"
+      cpu: "10m"
+    limits:
+      memory: "128Mi"
+      cpu: "100m"
+  livenessProbe:
+    httpGet:
+      path: /healthz
+      port: http
+    initialDelaySeconds: 10
+    periodSeconds: 30
+  volumeMounts:
+    - name: data
+      mountPath: /data
+    - name: receiver
+      mountPath: /app
+      readOnly: true
+
+# ...and the ConfigMap-backed volume carrying receiver.py, added to the pod's
+# `volumes:` list. Create it with:
+#   kubectl create configmap backhaul-receiver -n personal-data \
+#     --from-file=receiver.py=examples/receiver.py
+#
+# - name: receiver
+#   configMap:
+#     name: backhaul-receiver

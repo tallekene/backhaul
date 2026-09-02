@@ -1,0 +1,32 @@
+--- a/loop_sync.sh
++++ b/loop_sync.sh
+@@
+ INTERVAL="${SYNC_INTERVAL_SECONDS:-900}"
++
++# A file the Backhaul receiver sidecar touches when the watch reports that an
++# activity finished. Its presence cuts the sleep short so the fetch runs now
++# rather than up to INTERVAL seconds from now.
++TRIGGER="${GARMIN_DATA_DIR:-/data}/.sync-now"
++
++# Poll granularity while waiting. Small enough that the trigger feels instant,
++# large enough that the loop costs nothing when idle.
++TRIGGER_POLL=5
++
++# Sleep for INTERVAL, returning early if the trigger file appears.
++interruptible_sleep() {
++  waited=0
++  while [ "$waited" -lt "$INTERVAL" ]; do
++    if [ -f "$TRIGGER" ]; then
++      rm -f "$TRIGGER"
++      echo "[loop_sync] trigger seen after ${waited}s; syncing early"
++      return 0
++    fi
++    sleep "$TRIGGER_POLL" || return 0
++    waited=$((waited + TRIGGER_POLL))
++  done
++}
+@@
+   echo "[loop_sync] sleeping ${INTERVAL}s until next run"
+-  sleep "$INTERVAL" || true
++  interruptible_sleep || true
+ done
