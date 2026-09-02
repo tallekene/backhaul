@@ -104,6 +104,28 @@ Sideloading, no store account needed:
 Settings for a sideloaded app are edited in **Garmin Connect Mobile → your
 device → Connect IQ Apps → Backhaul → Settings**, exactly as for a store app.
 
+## 4b. Two things sideloading does that will confuse you
+
+**The .prg disappears.** The watch ingests a sideloaded app into internal
+storage and deletes the file, so `GARMIN/Apps/` ends up with no `.prg` in
+it at all - not yours, not any of your other Connect IQ apps. That is a
+successful install, not a failed one. Each new build must be copied across
+again.
+
+**Stored settings beat new defaults.** The first time the app runs, the
+watch writes `GARMIN/Apps/SETTINGS/<APPNAME>.SET` holding the values in
+force at that moment. From then on that file wins. Changing a default in
+`properties.xml` and reinstalling therefore appears to do nothing - the
+app keeps reading the old stored value. Delete the `.SET` file to make the
+new defaults take effect:
+
+```bash
+rm "<mountpoint>/Internal Storage/GARMIN/Apps/SETTINGS/BACKHAUL.SET"
+```
+
+This matters more than usual here because a sideloaded app has no settings
+UI at all (see 1b), so baked-in defaults are the only way to configure it.
+
 ## 5. Open the app once
 
 This is the step everyone misses. Background events are registered by the
