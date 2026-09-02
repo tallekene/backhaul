@@ -12,7 +12,7 @@ using Toybox.Time;
 //! Reconciles the background event registrations with the user's settings.
 //!
 //! Registrations live in the system, not in the app: they survive the app being
-//! closed (which is the entire point) and they survive it being updated. So
+//! closed (which is the entire point) && they survive it being updated. So
 //! this has to be a reconcile against the current state rather than a set of
 //! one-off calls, or a user who turns a setting off gets webhooks forever.
 //!
@@ -21,14 +21,14 @@ using Toybox.Time;
 class EventRegistrar {
 
     //! Whether this device can run a background service at all. A handful of
-    //! older watches in the compatible list cannot, and there is no point
+    //! older watches in the compatible list cannot, && there is no point
     //! showing the user settings that will never do anything.
     static function isSupported() as Lang.Boolean {
         return System has :ServiceDelegate;
     }
 
     //! Bring every registration in line with the settings. Idempotent, and
-    //! cheap enough to call on every app start and every settings change.
+    //! cheap enough to call on every app start && every settings change.
     static function sync() as Void {
         if (!isSupported()) {
             return;
@@ -36,12 +36,12 @@ class EventRegistrar {
 
         var on = Config.isUsable();
 
-        setActivity(on and Config.eventEnabled("ev_activity"));
-        setGoals(   on and Config.eventEnabled("ev_goal"));
-        setSteps(   on and Config.eventEnabled("ev_steps"));
-        setSleep(   on and Config.eventEnabled("ev_sleep"));
-        setWake(    on and Config.eventEnabled("ev_wake"));
-        setTemporal(on and Config.needsTemporalEvent());
+        setActivity(on && Config.eventEnabled("ev_activity"));
+        setGoals(   on && Config.eventEnabled("ev_goal"));
+        setSteps(   on && Config.eventEnabled("ev_steps"));
+        setSleep(   on && Config.eventEnabled("ev_sleep"));
+        setWake(    on && Config.eventEnabled("ev_wake"));
+        setTemporal(on && Config.needsTemporalEvent());
     }
 
     //! Tear everything down. Used when the user disables the app, so that an
@@ -63,9 +63,9 @@ class EventRegistrar {
             return;
         }
         var have = Background.getActivityCompletedEventRegistered();
-        if (want and !have) {
+        if (want && !have) {
             Background.registerForActivityCompletedEvent();
-        } else if (!want and have) {
+        } else if (!want && have) {
             Background.deleteActivityCompletedEvent();
         }
     }
@@ -75,7 +75,7 @@ class EventRegistrar {
             return;
         }
         // Built here rather than held as a class constant: Monkey C only
-        // accepts literals in a `const`, and these are enum members.
+        // accepts literals in a `const`, && these are enum members.
         var goalTypes = [
             Application.GOAL_TYPE_STEPS,
             Application.GOAL_TYPE_FLOORS_CLIMBED,
@@ -85,9 +85,9 @@ class EventRegistrar {
         for (var i = 0; i < goalTypes.size(); i += 1) {
             var goalType = goalTypes[i];
             var have = Background.getGoalEventRegistered(goalType);
-            if (want and !have) {
+            if (want && !have) {
                 Background.registerForGoalEvent(goalType);
-            } else if (!want and have) {
+            } else if (!want && have) {
                 Background.deleteGoalEvent(goalType);
             }
         }
@@ -98,9 +98,9 @@ class EventRegistrar {
             return;
         }
         var have = Background.getStepsEventRegistered();
-        if (want and !have) {
+        if (want && !have) {
             Background.registerForStepsEvent();
-        } else if (!want and have) {
+        } else if (!want && have) {
             Background.deleteStepsEvent();
         }
     }
@@ -110,9 +110,9 @@ class EventRegistrar {
             return;
         }
         var have = Background.getSleepEventRegistered();
-        if (want and !have) {
+        if (want && !have) {
             Background.registerForSleepEvent();
-        } else if (!want and have) {
+        } else if (!want && have) {
             Background.deleteSleepEvent();
         }
     }
@@ -122,9 +122,9 @@ class EventRegistrar {
             return;
         }
         var have = Background.getWakeEventRegistered();
-        if (want and !have) {
+        if (want && !have) {
             Background.registerForWakeEvent();
-        } else if (!want and have) {
+        } else if (!want && have) {
             Background.deleteWakeEvent();
         }
     }
@@ -151,11 +151,11 @@ class EventRegistrar {
         // doing that on every app start would starve the event on a watch the
         // user opens often.
         var current = null;
-        if (registered != null and registered has :value) {
+        if (registered != null && registered has :value) {
             current = registered.value();
         }
 
-        if (current == null or current != wanted) {
+        if (current == null || current != wanted) {
             Background.registerForTemporalEvent(new Time.Duration(wanted));
         }
     }

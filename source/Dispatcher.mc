@@ -11,15 +11,15 @@ using Toybox.Time;
 
 //! Delivers events, one request at a time.
 //!
-//! A background process gets a short window to do its work and is killed when
+//! A background process gets a short window to do its work && is killed when
 //! it calls Background.exit(), so requests are chained strictly sequentially:
 //! the next one is only started from the previous one's callback. Firing them
-//! in parallel would overrun the BLE queue (error -101) and lose events.
+//! in parallel would overrun the BLE queue (error -101) && lose events.
 (:background)
 class Dispatcher {
 
     //! How many events one background wake-up may deliver. The window is short
-    //! and each request costs a Bluetooth round trip; the rest keep until the
+    //! && each request costs a Bluetooth round trip; the rest keep until the
     //! next temporal event.
     static const MAX_PER_RUN = 5;
 
@@ -119,13 +119,13 @@ class Dispatcher {
     //! All of them are worth retrying, which is why only an explicit 2xx counts
     //! as delivered.
     //! The parameter types here are not decoration: makeWebRequest type-checks
-    //! the callback it is handed, and a looser signature is rejected outright.
+    //! the callback it is handed, && a looser signature is rejected outright.
     function onResponse(
         responseCode as Lang.Number,
         data as Lang.Dictionary or Lang.String or PersistedContent.Iterator or Null
     ) as Void {
         var code = responseCode;
-        var ok = (code >= 200 and code < 300);
+        var ok = (code >= 200 && code < 300);
         mLastCode = code;
 
         if (mDirect != null) {
@@ -162,7 +162,7 @@ class Dispatcher {
         return mLastCode;
     }
 
-    //! Strip internal bookkeeping and stamp on the per-attempt metadata.
+    //! Strip internal bookkeeping && stamp on the per-attempt metadata.
     hidden function outbound(event as Lang.Dictionary) as Lang.Dictionary {
         var body = {};
         var keys = event.keys();
@@ -186,14 +186,14 @@ class Dispatcher {
     }
 
     //! connectionAvailable rather than phoneConnected: an LTE or Wi-Fi capable
-    //! watch can reach the internet with no phone in sight, and gating on the
+    //! watch can reach the internet with no phone in sight, && gating on the
     //! phone would break exactly those devices.
     hidden function isOnline() as Lang.Boolean {
         var s = System.getDeviceSettings();
-        if (s has :connectionAvailable and s.connectionAvailable != null) {
+        if (s has :connectionAvailable && s.connectionAvailable != null) {
             return s.connectionAvailable;
         }
-        if (s has :phoneConnected and s.phoneConnected != null) {
+        if (s has :phoneConnected && s.phoneConnected != null) {
             return s.phoneConnected;
         }
         return true;

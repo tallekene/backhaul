@@ -60,7 +60,7 @@ class BackhaulServiceDelegate extends System.ServiceDelegate {
     }
 
     //! Every thousand steps. Off by default: on a busy day this is a lot of
-    //! webhooks and a measurable amount of battery.
+    //! webhooks && a measurable amount of battery.
     function onSteps() as Void {
         if (!enabled("ev_steps")) {
             return;
@@ -69,7 +69,7 @@ class BackhaulServiceDelegate extends System.ServiceDelegate {
         var steps = null;
         if (ActivityMonitor has :getInfo) {
             var info = ActivityMonitor.getInfo();
-            if (info != null and info has :steps) {
+            if (info != null && info has :steps) {
                 steps = info.steps;
             }
         }
@@ -94,7 +94,7 @@ class BackhaulServiceDelegate extends System.ServiceDelegate {
     }
 
     //! The periodic tick. Does double duty: it sends the heartbeat if the user
-    //! asked for one, and it is the only thing that ever gets a second go at
+    //! asked for one, && it is the only thing that ever gets a second go at
     //! events that were queued while the watch was offline.
     function onTemporalEvent() as Void {
         if (!Config.isUsable()) {
@@ -111,7 +111,7 @@ class BackhaulServiceDelegate extends System.ServiceDelegate {
         mDispatcher.drain();
     }
 
-    //! Build and hand off an event, or exit immediately if the app is not
+    //! Build && hand off an event, or exit immediately if the app is not
     //! configured well enough to send anything.
     hidden function fire(eventType as Lang.String, data as Lang.Dictionary or Null) as Void {
         if (!Config.isUsable()) {

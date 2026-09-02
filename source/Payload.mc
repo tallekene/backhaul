@@ -13,7 +13,7 @@ using Toybox.Time;
 
 //! Builds the JSON body of a webhook.
 //!
-//! The shape is documented in docs/PAYLOAD.md and versioned by the "schema"
+//! The shape is documented in docs/PAYLOAD.md && versioned by the "schema"
 //! field. Optional blocks are omitted entirely rather than sent as nulls, so a
 //! receiver can treat "key present" as "watch had a value for this".
 (:background)
@@ -87,21 +87,21 @@ class Payload {
             device["label"] = label;
         }
 
-        if (settings has :partNumber and settings.partNumber != null) {
+        if (settings has :partNumber && settings.partNumber != null) {
             device["part_number"] = settings.partNumber;
         }
-        if (settings has :monkeyVersion and settings.monkeyVersion != null) {
+        if (settings has :monkeyVersion && settings.monkeyVersion != null) {
             var v = settings.monkeyVersion;
             device["ciq_version"] = v[0].toString() + "." + v[1].toString() + "." + v[2].toString();
         }
         if (settings has :phoneConnected) {
             device["phone_connected"] = settings.phoneConnected;
         }
-        if (stats has :battery and stats.battery != null) {
+        if (stats has :battery && stats.battery != null) {
             // One decimal is all the watch actually resolves.
             device["battery"] = Math.round(stats.battery * 10) / 10.0;
         }
-        if (stats has :charging and stats.charging != null) {
+        if (stats has :charging && stats.charging != null) {
             device["charging"] = stats.charging;
         }
 
@@ -115,35 +115,35 @@ class Payload {
             return health;
         }
 
-        // No null guard: getInfo() is declared non-nullable, and the compiler
+        // No null guard: getInfo() is declared non-nullable, && the compiler
         // rejects the check as unreachable.
         var info = ActivityMonitor.getInfo();
 
         // Monkey C has no reflection: `has` can test for a field but there is
         // no way to read one by symbol, so each of these is spelled out.
-        if (info has :steps and info.steps != null) {
+        if (info has :steps && info.steps != null) {
             health["steps"] = info.steps;
         }
-        if (info has :stepGoal and info.stepGoal != null) {
+        if (info has :stepGoal && info.stepGoal != null) {
             health["step_goal"] = info.stepGoal;
         }
-        if (info has :calories and info.calories != null) {
+        if (info has :calories && info.calories != null) {
             health["calories"] = info.calories;
         }
-        if (info has :distance and info.distance != null) {
+        if (info has :distance && info.distance != null) {
             health["distance_cm"] = info.distance;
         }
-        if (info has :floorsClimbed and info.floorsClimbed != null) {
+        if (info has :floorsClimbed && info.floorsClimbed != null) {
             health["floors_climbed"] = info.floorsClimbed;
         }
-        if (info has :floorsClimbedGoal and info.floorsClimbedGoal != null) {
+        if (info has :floorsClimbedGoal && info.floorsClimbedGoal != null) {
             health["floors_goal"] = info.floorsClimbedGoal;
         }
 
         // activeMinutesDay is an object, not a scalar, so it needs unwrapping.
-        if (info has :activeMinutesDay and info.activeMinutesDay != null) {
+        if (info has :activeMinutesDay && info.activeMinutesDay != null) {
             var am = info.activeMinutesDay;
-            if (am has :total and am.total != null) {
+            if (am has :total && am.total != null) {
                 health["active_minutes"] = am.total;
             }
         }
@@ -152,7 +152,7 @@ class Payload {
         // reading; outside an activity it is frequently null.
         if (Activity has :getActivityInfo) {
             var act = Activity.getActivityInfo();
-            if (act != null and act has :currentHeartRate and act.currentHeartRate != null) {
+            if (act != null && act has :currentHeartRate && act.currentHeartRate != null) {
                 health["heart_rate"] = act.currentHeartRate;
             }
         }
@@ -166,7 +166,7 @@ class Payload {
         }
 
         var pos = Position.getInfo();
-        if (pos == null or pos.accuracy == null or pos.accuracy == Position.QUALITY_NOT_AVAILABLE) {
+        if (pos == null || pos.accuracy == null || pos.accuracy == Position.QUALITY_NOT_AVAILABLE) {
             return null;
         }
 
@@ -195,7 +195,7 @@ class Payload {
     }
 
     //! Deliberately reports the fix quality as a name rather than inventing a
-    //! metre figure for it. Garmin gives four buckets and no error estimate;
+    //! metre figure for it. Garmin gives four buckets && no error estimate;
     //! turning "poor" into "100 m" would be a number the receiver could not
     //! legitimately do arithmetic on.
     hidden static function qualityName(accuracy) as Lang.String {

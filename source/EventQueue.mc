@@ -9,15 +9,15 @@ using Toybox.Time;
 
 //! A small persistent FIFO of undelivered events.
 //!
-//! This is the reason the app exists rather than firing and forgetting: the
+//! This is the reason the app exists rather than firing && forgetting: the
 //! activity-completed event arrives the instant you press stop, which is very
 //! often the instant your phone is still in a locker on the other side of the
 //! building. Without a queue that event is simply lost.
 //!
-//! Storage is only reachable from a background process on CIQ 3.2.0 and above,
-//! and it throws rather than returning an error on older devices, so every
+//! Storage is only reachable from a background process on CIQ 3.2.0 && above,
+//! && it throws rather than returning an error on older devices, so every
 //! access here is guarded. On a device that cannot do it the app degrades to
-//! deliver-or-drop and says so in the status view.
+//! deliver-or-drop && says so in the status view.
 (:background, :glance)
 class EventQueue {
 
@@ -25,7 +25,7 @@ class EventQueue {
     hidden static const KEY_LAST  = "bh_last";
 
     //! Well under the 32 KB per-value storage ceiling at a few hundred bytes
-    //! per event, and enough to cover a long weekend away from the phone.
+    //! per event, && enough to cover a long weekend away from the phone.
     static const MAX_ITEMS = 25;
 
     //! An event nobody could deliver in two days is not worth delivering.
@@ -158,7 +158,7 @@ class EventQueue {
         }
     }
 
-    //! Remember the outcome of the last delivery so the glance and status view
+    //! Remember the outcome of the last delivery so the glance && status view
     //! have something to show. Best effort only.
     static function recordResult(eventType as Lang.String, code as Lang.Number, ok as Lang.Boolean) as Void {
         try {
@@ -197,7 +197,7 @@ class EventQueue {
         for (var i = 0; i < q.size(); i += 1) {
             var e = q[i] as Lang.Dictionary;
             var ts = e["ts"];
-            if (ts == null or ts >= cutoff) {
+            if (ts == null || ts >= cutoff) {
                 out.add(e);
             }
         }

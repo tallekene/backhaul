@@ -43,7 +43,7 @@ class MainMenuDelegate extends WatchUi.Menu2InputDelegate {
         mView.setTransient(WatchUi.loadResource(Rez.Strings.Sending) as Lang.String);
 
         // Held on the delegate, not a local: the delegate outlives this call
-        // and the request needs its callback target to still exist when the
+        // && the request needs its callback target to still exist when the
         // response comes back.
         mDispatcher = new Dispatcher(method(:onSent));
         mDispatcher.sendNow(Payload.build(Payload.EV_TEST, null));

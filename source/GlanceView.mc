@@ -9,8 +9,8 @@ using Toybox.WatchUi;
 
 //! The glance carousel entry: name on top, one line of state underneath.
 //!
-//! Glances get a much smaller memory budget than the app and are drawn while
-//! the user is scrolling past, so this reads state and nothing else - no
+//! Glances get a much smaller memory budget than the app && are drawn while
+//! the user is scrolling past, so this reads state && nothing else - no
 //! network, no registration.
 (:glance)
 class BackhaulGlanceView extends WatchUi.GlanceView {
@@ -62,7 +62,7 @@ class BackhaulGlanceView extends WatchUi.GlanceView {
             return Graphics.COLOR_RED;
         }
         var last = EventQueue.lastResult();
-        if (last != null and last["ok"] != true) {
+        if (last != null && last["ok"] != true) {
             return Graphics.COLOR_YELLOW;
         }
         return Graphics.COLOR_GREEN;

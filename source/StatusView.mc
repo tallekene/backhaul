@@ -9,7 +9,7 @@ using Toybox.System;
 using Toybox.Time;
 using Toybox.WatchUi;
 
-//! The one screen the app has: is it working, and what did it last do.
+//! The one screen the app has: is it working, && what did it last do.
 class StatusView extends WatchUi.View {
 
     hidden var mTransient as Lang.String or Null;
@@ -34,7 +34,7 @@ class StatusView extends WatchUi.View {
         var h = dc.getHeight();
 
         // Lay the three lines out as fractions of the screen so this survives
-        // contact with round, semi-round and rectangular devices alike, rather
+        // contact with round, semi-round && rectangular devices alike, rather
         // than shipping a layout per screen size.
         drawCentred(dc, w, h * 0.28, Graphics.FONT_MEDIUM, Graphics.COLOR_WHITE, "Backhaul");
         drawCentred(dc, w, h * 0.47, Graphics.FONT_SMALL,  headlineColour(), headline());
@@ -68,7 +68,7 @@ class StatusView extends WatchUi.View {
         if (mTransient != null) {
             return Graphics.COLOR_YELLOW;
         }
-        if (!EventRegistrar.isSupported() or !Config.isUsable()) {
+        if (!EventRegistrar.isSupported() || !Config.isUsable()) {
             return Graphics.COLOR_RED;
         }
         return Graphics.COLOR_GREEN;

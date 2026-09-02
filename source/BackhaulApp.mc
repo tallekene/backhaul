@@ -11,7 +11,7 @@ using Toybox.WatchUi;
 //! Entry point.
 //!
 //! The app itself does very little: it exists so that the user has somewhere to
-//! see what is going on, and - crucially - so that the background events get
+//! see what is going on, && - crucially - so that the background events get
 //! registered. Garmin will not let a background service register itself, which
 //! is why the app has to be opened once after installing or changing settings
 //! before anything is sent.

@@ -11,7 +11,7 @@ using Toybox.Lang;
 //!
 //! Every getter reads Properties on demand rather than caching. The background
 //! service is a separate process that is torn down after each event, so a cache
-//! would buy nothing there, and in the foreground it would go stale the moment
+//! would buy nothing there, && in the foreground it would go stale the moment
 //! the user changed a setting from the phone.
 (:background, :glance)
 class Config {
@@ -70,20 +70,38 @@ class Config {
 
     //! Master switch, plus the one setting without which nothing can work.
     static function isUsable() as Lang.Boolean {
-        return getBool("enabled", true) and (url().length() > 0);
+        return getBool("enabled", true) && (url().length() > 0);
     }
 
     static function url() as Lang.String {
         var u = getString("webhook_url");
-        // Trim, because the phone settings editor happily keeps trailing spaces
-        // and makeWebRequest will reject the URL without telling you why.
-        while (u.length() > 0 and u.substring(0, 1).equals(" ")) {
-            u = u.substring(1, u.length());
+        if (u.length() == 0) {
+            return u;
         }
-        while (u.length() > 0 and u.substring(u.length() - 1, u.length()).equals(" ")) {
-            u = u.substring(0, u.length() - 1);
+
+        // Trailing spaces survive the phone's settings editor and makeWebRequest
+        // rejects the URL without saying why, so trim both ends.
+        //
+        // Written as scan-then-slice rather than repeated substring calls in a
+        // compound condition: the original crashed on device with Out of Bounds
+        // because the guard's second operand was evaluated on an empty string.
+        var first = 0;
+        var last  = u.length();
+
+        while (first < last) {
+            if (!u.substring(first, first + 1).equals(" ")) {
+                break;
+            }
+            first += 1;
         }
-        return u;
+        while (last > first) {
+            if (!u.substring(last - 1, last).equals(" ")) {
+                break;
+            }
+            last -= 1;
+        }
+
+        return u.substring(first, last);
     }
 
     static function deviceLabel() as Lang.String {
@@ -91,8 +109,8 @@ class Config {
     }
 
     static function eventEnabled(name as Lang.String) as Lang.Boolean {
-        // Activity and goal default on, the noisier ones default off.
-        if (name.equals("ev_activity") or name.equals("ev_goal")) {
+        // Activity && goal default on, the noisier ones default off.
+        if (name.equals("ev_activity") || name.equals("ev_goal")) {
             return getBool(name, true);
         }
         return getBool(name, false);
@@ -141,7 +159,7 @@ class Config {
         var hv = getString("header_value");
         // Length checks rather than .equals(""): comparing against an empty
         // string literal is a known crash-on-device / fine-in-simulator trap.
-        if (hn.length() > 0 and hv.length() > 0) {
+        if (hn.length() > 0 && hv.length() > 0) {
             h[hn] = hv;
         }
 

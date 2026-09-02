@@ -6,7 +6,7 @@
 using Toybox.Lang;
 using Toybox.WatchUi;
 
-//! Input handling for the status screen. Both the select button and the menu
+//! Input handling for the status screen. Both the select button && the menu
 //! button open the same menu, because which one a user reaches for depends
 //! entirely on which Garmin they own.
 class StatusDelegate extends WatchUi.BehaviorDelegate {
@@ -34,7 +34,7 @@ class StatusDelegate extends WatchUi.BehaviorDelegate {
         menu.addItem(new WatchUi.MenuItem(
             WatchUi.loadResource(Rez.Strings.MenuSendTest) as Lang.String, null, :test, {}));
 
-        if (EventQueue.isSupported() and EventQueue.size() > 0) {
+        if (EventQueue.isSupported() && EventQueue.size() > 0) {
             menu.addItem(new WatchUi.MenuItem(
                 WatchUi.loadResource(Rez.Strings.MenuFlushQueue) as Lang.String, null, :flush, {}));
             menu.addItem(new WatchUi.MenuItem(

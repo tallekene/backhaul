@@ -5,17 +5,17 @@
 
 using Toybox.Lang;
 
-//! Human-readable names for the FIT sport and sub-sport enumerations.
+//! Human-readable names for the FIT sport && sub-sport enumerations.
 //!
 //! The raw integer always travels alongside the name, so a receiver that cares
 //! about correctness can map it itself against the FIT profile. This table is a
-//! convenience for the common cases and deliberately is not exhaustive:
+//! convenience for the common cases && deliberately is not exhaustive:
 //! anything past the end comes through as "sport_<n>", which is still
 //! unambiguous.
 //!
 //! Stored as arrays indexed by the enum value rather than dictionaries. Both
 //! enumerations are contiguous from zero, an array is a good deal cheaper in
-//! the background process's memory budget, and Monkey C will not accept a
+//! the background process's memory budget, && Monkey C will not accept a
 //! dictionary literal as a `const` anyway.
 (:background)
 class Sports {
@@ -65,7 +65,7 @@ class Sports {
             return prefix + "_unknown";
         }
 
-        if (i == null or i < 0 or i >= names.size()) {
+        if (i == null || i < 0 || i >= names.size()) {
             return prefix + "_" + id.toString();
         }
         return names[i];
