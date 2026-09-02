@@ -5,6 +5,7 @@
 
 using Toybox.Communications;
 using Toybox.Lang;
+using Toybox.PersistedContent;
 using Toybox.System;
 using Toybox.Time;
 
@@ -117,7 +118,13 @@ class Dispatcher {
     //! HTTP statuses (-104 no connection, -101 BLE queue full, -300 timeout).
     //! All of them are worth retrying, which is why only an explicit 2xx counts
     //! as delivered.
-    function onResponse(code as Lang.Number, data) as Void {
+    //! The parameter types here are not decoration: makeWebRequest type-checks
+    //! the callback it is handed, and a looser signature is rejected outright.
+    function onResponse(
+        responseCode as Lang.Number,
+        data as Lang.Dictionary or Lang.String or PersistedContent.Iterator or Null
+    ) as Void {
+        var code = responseCode;
         var ok = (code >= 200 and code < 300);
         mLastCode = code;
 

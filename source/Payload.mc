@@ -115,10 +115,9 @@ class Payload {
             return health;
         }
 
+        // No null guard: getInfo() is declared non-nullable, and the compiler
+        // rejects the check as unreachable.
         var info = ActivityMonitor.getInfo();
-        if (info == null) {
-            return health;
-        }
 
         // Monkey C has no reflection: `has` can test for a field but there is
         // no way to read one by symbol, so each of these is spelled out.

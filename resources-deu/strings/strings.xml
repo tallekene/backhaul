@@ -1,5 +1,7 @@
 <strings>
-  <!-- App name is a proper noun and stays untranslated. -->
+  <!-- Proper noun, untranslated - but it must still be declared here, or the
+       glance scope has no AppName for this language. -->
+  <string id="AppName" scope="glance">Backhaul</string>
 
   <!-- Einstellungen -->
   <string id="SetEnabled">Aktiviert</string>
