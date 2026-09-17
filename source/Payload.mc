@@ -10,6 +10,7 @@ using Toybox.Math;
 using Toybox.Position;
 using Toybox.System;
 using Toybox.Time;
+using Toybox.Time.Gregorian;
 
 //! Builds the JSON body of a webhook.
 //!
@@ -37,14 +38,18 @@ class Payload {
     //! @return A dictionary ready to hand to makeWebRequest, minus the delivery
     //!         metadata that Dispatcher stamps on at send time.
     static function build(eventType as Lang.String, data as Lang.Dictionary or Null) as Lang.Dictionary {
-        var now = Time.now().value();
+        var moment = Time.now();
+        var now = moment.value();
+        var day = Gregorian.info(moment, Time.FORMAT_SHORT);
 
         var event = {
-            "schema"    => SCHEMA_VERSION,
-            "event"     => eventType,
-            "id"        => eventId(eventType, now),
-            "ts"        => now,
-            "device"    => deviceBlock()
+            "schema"       => SCHEMA_VERSION,
+            "event"        => eventType,
+            "id"           => eventId(eventType, now),
+            "ts"           => now,
+            "local_date"   => Lang.format("$1$-$2$-$3$", [day.year, (day.month as Lang.Number).format("%02d"), day.day.format("%02d")]),
+            "utc_offset_s" => System.getClockTime().timeZoneOffset,
+            "device"       => deviceBlock()
         };
 
         if (data != null) {

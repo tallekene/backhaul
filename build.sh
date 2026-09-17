@@ -14,6 +14,9 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEVICE="${2:-fenix7x}"
 KEY="${CIQ_DEVELOPER_KEY:-$HOME/.config/garmin/developer_key.der}"
 OUT="$ROOT/bin"
+# A sideloaded app has no settings UI, so `build` bakes defaults from this file
+# into a staged copy of the source. See docs/BUILD.md.
+SIDELOAD_ENV="${BACKHAUL_SIDELOAD_ENV:-$HOME/.config/backhaul/sideload.env}"
 
 if ! command -v monkeyc >/dev/null; then
   echo "monkeyc not on PATH. Install the Connect IQ SDK - see docs/BUILD.md" >&2
@@ -29,9 +32,17 @@ mkdir -p "$OUT"
 
 case "${1:-build}" in
   build|sim)
-    monkeyc -f "$ROOT/monkey.jungle" -d "$DEVICE" -o "$OUT/backhaul.prg" -y "$KEY" --warn
+    SRC="$ROOT"
+    if [ "${1:-build}" = "build" ] && [ -f "$SIDELOAD_ENV" ]; then
+      SRC="$(mktemp -d)"
+      trap 'rm -rf "$SRC"' EXIT
+      cp -r "$ROOT"/monkey.jungle "$ROOT"/manifest.xml "$ROOT"/source "$ROOT"/resources* "$SRC"/
+      "$ROOT/tools/bake_settings.py" "$SIDELOAD_ENV" "$SRC/resources/settings/properties.xml"
+      echo "baked setting defaults from $SIDELOAD_ENV"
+    fi
+    monkeyc -f "$SRC/monkey.jungle" -d "$DEVICE" -o "$OUT/backhaul.prg" -y "$KEY" --warn
     echo "built $OUT/backhaul.prg for $DEVICE"
-    if [ "${1}" = "sim" ]; then
+    if [ "${1:-build}" = "sim" ]; then
       # connectiq starts the simulator; it is a no-op if one is already up.
       connectiq &
       sleep 3
