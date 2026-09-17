@@ -11,6 +11,8 @@ application/json`. Nothing is ever sent as a query parameter.
   "event": "activity.completed",
   "id": "activity.completed-1772668800-04213",
   "ts": 1772668800,
+  "local_date": "2026-03-05",
+  "utc_offset_s": 3600,
   "sent_at": 1772669100,
   "attempt": 2,
   "device": { },
@@ -26,6 +28,8 @@ application/json`. Nothing is ever sent as a query parameter.
 | `event` | yes | Event type, see below. |
 | `id` | yes | Stable across retries of the same event. **Deduplicate on this.** |
 | `ts` | yes | When the event happened on the watch, Unix seconds UTC. |
+| `local_date` | yes | The watch's calendar day at `ts`, `YYYY-MM-DD`. Daily totals such as `health.steps` reset on this day, so attribute them by it rather than by converting `ts`. |
+| `utc_offset_s` | yes | The watch's UTC offset at `ts` in seconds, daylight saving included. |
 | `sent_at` | yes | When *this delivery attempt* was made. |
 | `attempt` | yes | 1 on first try, higher when it came out of the retry queue. |
 | `device` | yes | Which watch, and what state it was in. |
