@@ -1,11 +1,8 @@
 <properties>
   <!-- Destination. Must be https:// for anything other than the simulator.
-
-       PROTOTYPE DEFAULT: a sideloaded app cannot be configured from Connect IQ
-       Mobile (settings need a store-registered app), so the test endpoint is
-       baked in here. Blank this before submitting to the store - shipping a
-       default URL would send every user's events to it. -->
-  <property id="webhook_url" type="string">https://n8n.laemmlein.org/webhook/backhaul-test</property>
+       Keep it blank here: a default would send every store user's events to
+       it. Sideload builds get theirs from sideload.env, see docs/BUILD.md. -->
+  <property id="webhook_url" type="string"></property>
 
   <!-- Optional bearer token. Sent as "Authorization: Bearer <token>" when set. -->
   <property id="auth_token" type="string"></property>

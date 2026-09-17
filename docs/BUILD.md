@@ -95,14 +95,25 @@ Substitute your own device id; the full list is in `manifest.xml`.
 
 ## 4. Run it on the watch
 
+A sideloaded app has no settings page in Garmin Connect Mobile, so its
+defaults are its configuration. Put the ones you need in
+`~/.config/backhaul/sideload.env` (or set `BACKHAUL_SIDELOAD_ENV`), one
+`property_id=value` per line, ids as in `resources/settings/properties.xml`:
+
+```
+webhook_url=https://example.org/webhook/backhaul
+auth_token=<token>
+```
+
+`./build.sh build` bakes these into a staged copy of the source, so they never
+reach the repository. Keep the file mode 600. `sim` builds ignore it, so
+simulator events never reach the real endpoint.
+
 Sideloading, no store account needed:
 
 1. Connect the watch by USB. It mounts as mass storage.
 2. Copy `bin/backhaul.prg` into `GARMIN/APPS/` on the device.
 3. Eject, and the app appears in the app list.
-
-Settings for a sideloaded app are edited in **Garmin Connect Mobile → your
-device → Connect IQ Apps → Backhaul → Settings**, exactly as for a store app.
 
 ## 4b. Two things sideloading does that will confuse you
 
