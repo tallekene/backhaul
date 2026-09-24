@@ -74,6 +74,12 @@ Two capabilities degrade rather than exclude a device:
 - **Background services** are unavailable on a handful of older watches. The
   app detects this and reports "Not supported" instead of pretending to work.
 
+How deep the queue goes also depends on the device. Garmin gives a background
+process 64 KB on newer watches and 32 KB on older ones, which works out at the
+full 25 events on a fēnix 7X and around four on a fēnix 6 Pro. The app measures
+the room it has before each write rather than assuming, and when it runs out it
+drops the oldest event to make room for the newest.
+
 ## Licence
 
 MIT. See [LICENSE](LICENSE).

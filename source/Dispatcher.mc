@@ -29,23 +29,34 @@ class Dispatcher {
     hidden var mDelivered as Lang.Number;
     hidden var mLastCode  as Lang.Number;
 
-    //! Snapshot of the queue for this run, plus how far through it we are.
-    //! Held in memory rather than re-read between deliveries - see
-    //! EventQueue.snapshot() for why.
-    hidden var mPending as Lang.Array or Null;
-    hidden var mIndex   as Lang.Number;
+    //! The queue index for this run - [id, ts, attempts] per entry - plus how
+    //! far through it we are. Only the index is held across the run; each event
+    //! body is loaded when its turn comes and released afterwards, so the
+    //! backlog costs the background process almost nothing.
+    hidden var mPendingIdx as Lang.Array or Null;
+    hidden var mIndex      as Lang.Number;
+    hidden var mCurrent    as Lang.Dictionary or Null;
+
+    //! The outcome to record once the run ends. Recording it per delivery would
+    //! mean writing to Storage inside a web-request callback, which on device
+    //! left the following read seeing stale data.
+    hidden var mLastType as Lang.String or Null;
+    hidden var mLastOk   as Lang.Boolean;
 
     //! @param onDone Called once when this run is finished, with no arguments.
     //!               In the background that is Background.exit(); in the
     //!               foreground it refreshes the view.
     function initialize(onDone as Lang.Method or Null) {
-        mOnDone    = onDone;
-        mBudget    = MAX_PER_RUN;
-        mDirect    = null;
-        mDelivered = 0;
-        mLastCode  = 0;
-        mPending   = null;
-        mIndex     = 0;
+        mOnDone     = onDone;
+        mBudget     = MAX_PER_RUN;
+        mDirect     = null;
+        mDelivered  = 0;
+        mLastCode   = 0;
+        mPendingIdx = null;
+        mIndex      = 0;
+        mCurrent    = null;
+        mLastType   = null;
+        mLastOk     = false;
     }
 
     //! Hand a freshly captured event to the delivery machinery.
@@ -59,7 +70,7 @@ class Dispatcher {
             // Nothing to attempt. If the queue took it we will get another go
             // at the next temporal event; if it did not, the event is lost and
             // there is genuinely nothing else we can do about it.
-            EventQueue.recordResult(eventType(event), 0, false);
+            remember(eventType(event), 0, false);
             finish();
             return;
         }
@@ -68,7 +79,7 @@ class Dispatcher {
             drain();
         } else {
             mDirect = event;
-            send(event);
+            send(event, 0);
         }
     }
 
@@ -78,19 +89,19 @@ class Dispatcher {
     //! user so, not quietly pile up in the queue to be redelivered later.
     function sendNow(event as Lang.Dictionary) as Void {
         if (!isOnline()) {
-            EventQueue.recordResult(eventType(event), 0, false);
+            remember(eventType(event), 0, false);
             finish();
             return;
         }
         mDirect = event;
-        send(event);
+        send(event, 0);
     }
 
     //! Work through the backlog. Safe to call with an empty queue.
     function drain() as Void {
-        if (mPending == null) {
-            mPending = EventQueue.snapshot();
-            mIndex   = 0;
+        if (mPendingIdx == null) {
+            mPendingIdx = EventQueue.index();
+            mIndex      = 0;
         }
         sendNext();
     }
@@ -98,7 +109,7 @@ class Dispatcher {
     //! Deliver the item under the cursor, or stop if there is nothing left to
     //! do, no connection, or no budget.
     hidden function sendNext() as Void {
-        if (mPending == null || mIndex >= mPending.size()) {
+        if (mPendingIdx == null || mIndex >= mPendingIdx.size()) {
             finish();
             return;
         }
@@ -106,14 +117,24 @@ class Dispatcher {
             finish();
             return;
         }
+
+        var entry = mPendingIdx[mIndex] as Lang.Array;
+        mCurrent = EventQueue.get(entry[EventQueue.I_ID]);
+        if (mCurrent == null) {
+            // The index outlived the body. Skip it; commit() drops the entry.
+            mIndex += 1;
+            sendNext();
+            return;
+        }
+
         mBudget -= 1;
-        send(mPending[mIndex] as Lang.Dictionary);
+        send(mCurrent, entry[EventQueue.I_ATTEMPTS]);
     }
 
-    hidden function send(event as Lang.Dictionary) as Void {
+    hidden function send(event as Lang.Dictionary, attempts) as Void {
         Communications.makeWebRequest(
             Config.url(),
-            outbound(event),
+            outbound(event, attempts),
             {
                 :method       => Communications.HTTP_REQUEST_METHOD_POST,
                 :headers      => Config.headers(),
@@ -137,10 +158,9 @@ class Dispatcher {
     ) as Void {
         var code = responseCode;
         var ok = (code >= 200 && code < 300);
-        mLastCode = code;
 
         if (mDirect != null) {
-            EventQueue.recordResult(eventType(mDirect), code, ok);
+            remember(eventType(mDirect), code, ok);
             if (ok) {
                 mDelivered += 1;
             }
@@ -148,13 +168,13 @@ class Dispatcher {
             return;
         }
 
-        if (mPending == null || mIndex >= mPending.size()) {
+        if (mPendingIdx == null || mIndex >= mPendingIdx.size()) {
             finish();
             return;
         }
 
-        var event = mPending[mIndex] as Lang.Dictionary;
-        EventQueue.recordResult(eventType(event), code, ok);
+        remember(mCurrent == null ? "unknown" : eventType(mCurrent), code, ok);
+        mCurrent = null;
 
         if (ok) {
             mDelivered += 1;
@@ -166,8 +186,8 @@ class Dispatcher {
         // Count the attempt against this event and stop the run, rather than
         // hammering a server that is down or a URL that is wrong. commit()
         // discards it once it has burned through MAX_ATTEMPTS.
-        var attempts = event["attempts"];
-        event["attempts"] = (attempts == null ? 0 : attempts) + 1;
+        var entry = mPendingIdx[mIndex] as Lang.Array;
+        entry[EventQueue.I_ATTEMPTS] = entry[EventQueue.I_ATTEMPTS] + 1;
         finish();
     }
 
@@ -179,27 +199,27 @@ class Dispatcher {
         return mLastCode;
     }
 
-    //! Strip internal bookkeeping && stamp on the per-attempt metadata.
-    hidden function outbound(event as Lang.Dictionary) as Lang.Dictionary {
-        var body = {};
-        var keys = event.keys();
-        for (var i = 0; i < keys.size(); i += 1) {
-            var k = keys[i];
-            if (!k.equals("attempts")) {
-                body[k] = event[k];
-            }
-        }
-
-        var attempts = event["attempts"];
-        body["attempt"] = (attempts == null ? 0 : attempts) + 1;
-        body["sent_at"] = Time.now().value();
-
-        return body;
+    //! Stamp on the per-attempt metadata.
+    //!
+    //! The event is mutated rather than copied: it came straight out of Storage
+    //! for this one send, nothing else holds it, and a copy would mean two
+    //! whole events in a heap that has room for about one.
+    hidden function outbound(event as Lang.Dictionary, attempts) as Lang.Dictionary {
+        event["attempt"] = (attempts == null ? 0 : attempts) + 1;
+        event["sent_at"] = Time.now().value();
+        return event;
     }
 
     hidden function eventType(event as Lang.Dictionary) as Lang.String {
         var t = event["event"];
         return t == null ? "unknown" : t.toString();
+    }
+
+    //! Hold the outcome until finish(); see mLastType.
+    hidden function remember(type as Lang.String, code as Lang.Number, ok as Lang.Boolean) as Void {
+        mLastType = type;
+        mLastCode = code;
+        mLastOk   = ok;
     }
 
     //! connectionAvailable rather than phoneConnected: an LTE or Wi-Fi capable
@@ -216,32 +236,37 @@ class Dispatcher {
         return true;
     }
 
-    //! Persist whatever is left of the snapshot, exactly once per run, then
-    //! hand back to the caller.
+    //! Persist whatever is left of the run, exactly once, then hand back to the
+    //! caller.
     hidden function finish() as Void {
+        mCurrent = null;
         commit();
+        if (mLastType != null) {
+            EventQueue.recordResult(mLastType, mLastCode, mLastOk);
+            mLastType = null;
+        }
         if (mOnDone != null) {
             mOnDone.invoke();
         }
     }
 
     //! Everything from the cursor onwards survives, minus anything that has
-    //! exhausted its attempts. Delivered events are simply left behind.
+    //! exhausted its attempts. Delivered events are simply left behind, and
+    //! EventQueue.commit() deletes the bodies of whatever did not make the cut.
     hidden function commit() as Void {
-        if (mPending == null) {
+        if (mPendingIdx == null) {
             return;
         }
 
         var keep = [];
-        for (var i = mIndex; i < mPending.size(); i += 1) {
-            var e = mPending[i] as Lang.Dictionary;
-            var a = e["attempts"];
-            if (a == null || a < EventQueue.MAX_ATTEMPTS) {
-                keep.add(e);
+        for (var i = mIndex; i < mPendingIdx.size(); i += 1) {
+            var entry = mPendingIdx[i] as Lang.Array;
+            if (entry[EventQueue.I_ATTEMPTS] < EventQueue.MAX_ATTEMPTS) {
+                keep.add(entry);
             }
         }
 
-        EventQueue.replaceAll(keep);
-        mPending = null;
+        EventQueue.commit(keep);
+        mPendingIdx = null;
     }
 }
