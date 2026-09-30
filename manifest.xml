@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
     Backhaul - send a webhook from your Garmin watch when things happen.
-    https://github.com/laemmlein/backhaul
+    https://github.com/tallekene/backhaul
 -->
 <iq:manifest version="3" xmlns:iq="http://www.garmin.com/xml/connectiq">
   <iq:application
@@ -160,7 +160,6 @@
     </iq:permissions>
     <iq:languages>
       <iq:language>eng</iq:language>
-      <iq:language>deu</iq:language>
     </iq:languages>
     <iq:barrels/>
   </iq:application>

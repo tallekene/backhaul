@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Backhaul - https://github.com/laemmlein/backhaul
+// Backhaul - https://github.com/tallekene/backhaul
 // Distributed under the MIT Licence. See LICENSE.
 //-----------------------------------------------------------------------------
 
@@ -195,6 +195,13 @@ class EventQueue {
     //! Remember the outcome of the last delivery so the glance && status view
     //! have something to show. Best effort only.
     static function recordResult(eventType as Lang.String, code as Lang.Number, ok as Lang.Boolean) as Void {
+        // Guarded like every other write here: Storage.setValue() raises an
+        // out-of-memory error that the catch below cannot see, and this runs at
+        // the end of every background run. Not routed through write(), because
+        // a failed status write must not mark the whole queue unsupported.
+        if (!hasHeadroom()) {
+            return;
+        }
         try {
             Storage.setValue(KEY_LAST, {
                 "ts"    => Time.now().value(),

@@ -1,5 +1,6 @@
 <properties>
-  <!-- Destination. Must be https:// for anything other than the simulator.
+  <!-- Destination. Must be https://, except for http://localhost and
+       http://127.0.0.1, which the simulator can reach and a watch cannot.
        Keep it blank here: a default would send every store user's events to
        it. Sideload builds get theirs from sideload.env, see docs/BUILD.md. -->
   <property id="webhook_url" type="string"></property>

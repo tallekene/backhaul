@@ -3,12 +3,16 @@
     <settingConfig type="boolean" />
   </setting>
 
-  <setting propertyKey="@Properties.webhook_url" title="@Strings.SetUrl" prompt="@Strings.SetUrlPrompt">
-    <settingConfig type="alphaNumeric" required="true" maxLength="256" />
+  <setting propertyKey="@Properties.webhook_url" title="@Strings.SetUrl" prompt="@Strings.SetUrlPrompt"
+           helpUrl="https://backhaul.tallekene.com/">
+    <settingConfig type="alphaNumeric" required="true" maxLength="256"
+                   errorMessage="@Strings.ErrUrlRequired" />
   </setting>
 
+  <!-- password rather than alphaNumeric: these two hold secrets, and
+       alphaNumeric renders them in clear text in Garmin Connect Mobile. -->
   <setting propertyKey="@Properties.auth_token" title="@Strings.SetAuthToken" prompt="@Strings.SetAuthTokenPrompt">
-    <settingConfig type="alphaNumeric" required="false" maxLength="256" />
+    <settingConfig type="password" required="false" maxLength="256" />
   </setting>
 
   <setting propertyKey="@Properties.header_name" title="@Strings.SetHeaderName" prompt="@Strings.SetHeaderNamePrompt">
@@ -16,7 +20,7 @@
   </setting>
 
   <setting propertyKey="@Properties.header_value" title="@Strings.SetHeaderValue" prompt="@Strings.SetHeaderValuePrompt">
-    <settingConfig type="alphaNumeric" required="false" maxLength="256" />
+    <settingConfig type="password" required="false" maxLength="256" />
   </setting>
 
   <setting propertyKey="@Properties.device_label" title="@Strings.SetDeviceLabel" prompt="@Strings.SetDeviceLabelPrompt">
@@ -48,7 +52,7 @@
   </setting>
 
   <setting propertyKey="@Properties.heartbeat_minutes" title="@Strings.SetHeartbeatMinutes" prompt="@Strings.SetHeartbeatMinutesPrompt">
-    <settingConfig type="numeric" min="5" max="1440" />
+    <settingConfig type="numeric" min="5" max="1440" errorMessage="@Strings.ErrHeartbeatRange" />
   </setting>
 
   <setting propertyKey="@Properties.include_location" title="@Strings.SetIncludeLocation">

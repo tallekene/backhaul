@@ -93,6 +93,25 @@ Point the build at a different one with `CIQ_DEVELOPER_KEY=/path/to/key.der`.
 
 Substitute your own device id; the full list is in `manifest.xml`.
 
+`./build.sh sim` runs `connectiq` from the SDK directly, which fails on Arch
+with `libwebkit2gtk-4.0.so.37: cannot open shared object file` - the simulator
+links the same EOL library as the SDK Manager. Use the container instead:
+
+```bash
+./tools/sdkmanager-docker/sim.sh start
+./tools/sdkmanager-docker/sim.sh run bin/backhaul.prg fenix7x
+./tools/sdkmanager-docker/sim.sh logs
+./tools/sdkmanager-docker/sim.sh stop
+```
+
+The prg has to live under the project directory, because that is what the
+container mounts. Two further limits, both found the hard way: the simulator
+accepts only one `run` per container lifetime, so restart it between tests, and
+the simulator opens on the *glance* view for an app that has one - you have to
+press START on the device to reach the app itself, which no amount of `xdotool`
+will do for you, because the compositor will not hand focus to the XWayland
+window.
+
 ## 4. Run it on the watch
 
 A sideloaded app has no settings page in Garmin Connect Mobile, so its

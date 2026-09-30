@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Backhaul - https://github.com/laemmlein/backhaul
+// Backhaul - https://github.com/tallekene/backhaul
 // Distributed under the MIT Licence. See LICENSE.
 //-----------------------------------------------------------------------------
 
@@ -26,17 +26,21 @@ class MainMenuDelegate extends WatchUi.Menu2InputDelegate {
         } else if (id == :flush) {
             flush();
         } else if (id == :clear) {
-            EventQueue.clear();
-            WatchUi.popView(WatchUi.SLIDE_DOWN);
-            mView.setTransient(null);
+            // Discarding is not recoverable, so it gets the standard Garmin
+            // confirmation rather than firing on a single button press.
+            WatchUi.pushView(
+                new WatchUi.Confirmation(WatchUi.loadResource(Rez.Strings.ConfirmClear) as Lang.String),
+                new ClearQueueDelegate(mView),
+                WatchUi.SLIDE_UP);
         }
     }
 
     hidden function sendTest() as Void {
         WatchUi.popView(WatchUi.SLIDE_DOWN);
 
-        if (!Config.isUsable()) {
-            mView.setTransient(WatchUi.loadResource(Rez.Strings.StatusNoUrl) as Lang.String);
+        var blocked = mView.blocker();
+        if (blocked != null) {
+            mView.setTransient(blocked);
             return;
         }
 
@@ -61,5 +65,31 @@ class MainMenuDelegate extends WatchUi.Menu2InputDelegate {
     //! to reporting whatever EventQueue recorded as the last result.
     function onSent() as Void {
         mView.setTransient(null);
+    }
+}
+
+//! Yes/no handler for "Discard queued".
+//!
+//! Deliberately does not pop the menu underneath the confirmation. Garmin
+//! documents neither the order in which the confirmation dismisses itself nor
+//! its own example calling popView here, so a pop from this callback risks
+//! taking the confirmation rather than the menu. Leaving the stack alone is
+//! correct either way: the user backs out to a status screen that already
+//! reflects the cleared queue.
+class ClearQueueDelegate extends WatchUi.ConfirmationDelegate {
+
+    hidden var mView as StatusView;
+
+    function initialize(view as StatusView) {
+        ConfirmationDelegate.initialize();
+        mView = view;
+    }
+
+    function onResponse(response) as Lang.Boolean {
+        if (response == WatchUi.CONFIRM_YES) {
+            EventQueue.clear();
+            mView.setTransient(null);
+        }
+        return true;
     }
 }

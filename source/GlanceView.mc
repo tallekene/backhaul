@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Backhaul - https://github.com/laemmlein/backhaul
+// Backhaul - https://github.com/tallekene/backhaul
 // Distributed under the MIT Licence. See LICENSE.
 //-----------------------------------------------------------------------------
 
@@ -41,6 +41,9 @@ class BackhaulGlanceView extends WatchUi.GlanceView {
         }
         if (Config.url().length() == 0) {
             return WatchUi.loadResource(Rez.Strings.StatusNoUrl) as Lang.String;
+        }
+        if (!Config.urlIsValid()) {
+            return WatchUi.loadResource(Rez.Strings.StatusBadUrl) as Lang.String;
         }
 
         var queued = EventQueue.size();
