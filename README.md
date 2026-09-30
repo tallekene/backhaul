@@ -26,7 +26,10 @@ Payloads are documented in [docs/PAYLOAD.md](docs/PAYLOAD.md).
 The activity-completed event arrives the instant you press stop, which is very
 often the instant your phone is still in a locker on the other side of the
 building. Backhaul writes undelivered events to device storage and retries them
-on its next wake-up, for up to 48 hours.
+on its next wake-up, for up to 48 hours or 10 delivery attempts, whichever comes
+first. Time away from the phone costs no attempts, so a watch that simply cannot
+reach anything keeps its events for the full two days; the attempt limit is what
+stops one unreachable endpoint retrying forever.
 
 This is the thing that separates it from wiring the same event up by hand: the
 naive version drops exactly the events you most wanted.

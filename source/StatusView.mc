@@ -36,10 +36,15 @@ class StatusView extends WatchUi.View {
         // Lay the three lines out as fractions of the screen so this survives
         // contact with round, semi-round && rectangular devices alike, rather
         // than shipping a layout per screen size.
-        drawCentred(dc, w, h * 0.28, Graphics.FONT_MEDIUM, Graphics.COLOR_WHITE, "Backhaul");
+        drawCentred(dc, w, h * 0.28, Graphics.FONT_MEDIUM, Graphics.COLOR_WHITE,
+            WatchUi.loadResource(Rez.Strings.AppName) as Lang.String);
         drawCentred(dc, w, h * 0.47, Graphics.FONT_SMALL,  headlineColour(), headline());
         drawCentred(dc, w, h * 0.62, Graphics.FONT_TINY,   Graphics.COLOR_LT_GRAY, queueLine());
         drawCentred(dc, w, h * 0.74, Graphics.FONT_TINY,   Graphics.COLOR_LT_GRAY, lastLine());
+    }
+
+    hidden function relative(resource, value as Lang.Number) as Lang.String {
+        return Lang.format(WatchUi.loadResource(resource) as Lang.String, [value.toString()]);
     }
 
     hidden function drawCentred(dc as Graphics.Dc, w as Lang.Number, y as Lang.Float,
@@ -48,10 +53,9 @@ class StatusView extends WatchUi.View {
         dc.drawText(w / 2, y, font, text, Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
     }
 
-    hidden function headline() as Lang.String {
-        if (mTransient != null) {
-            return mTransient;
-        }
+    //! Why the app cannot send anything right now, or null when it can.
+    //! Public so the menu reports the same reason rather than re-deriving it.
+    function blocker() as Lang.String or Null {
         if (!EventRegistrar.isSupported()) {
             return WatchUi.loadResource(Rez.Strings.StatusUnsupported) as Lang.String;
         }
@@ -60,6 +64,20 @@ class StatusView extends WatchUi.View {
         }
         if (Config.url().length() == 0) {
             return WatchUi.loadResource(Rez.Strings.StatusNoUrl) as Lang.String;
+        }
+        if (!Config.urlIsValid()) {
+            return WatchUi.loadResource(Rez.Strings.StatusBadUrl) as Lang.String;
+        }
+        return null;
+    }
+
+    hidden function headline() as Lang.String {
+        if (mTransient != null) {
+            return mTransient;
+        }
+        var blocked = blocker();
+        if (blocked != null) {
+            return blocked;
         }
         return WatchUi.loadResource(Rez.Strings.StatusReady) as Lang.String;
     }
@@ -115,19 +133,19 @@ class StatusView extends WatchUi.View {
 
         var seconds = Time.now().value() - ts;
         if (seconds < 60) {
-            return "just now";
+            return WatchUi.loadResource(Rez.Strings.AgoJustNow) as Lang.String;
         }
 
         var minutes = seconds / 60;
         if (minutes < 60) {
-            return minutes.toString() + "m ago";
+            return relative(Rez.Strings.AgoMinutes, minutes);
         }
 
         var hours = minutes / 60;
         if (hours < 24) {
-            return hours.toString() + "h ago";
+            return relative(Rez.Strings.AgoHours, hours);
         }
 
-        return (hours / 24).toString() + "d ago";
+        return relative(Rez.Strings.AgoDays, hours / 24);
     }
 }

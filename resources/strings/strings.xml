@@ -28,6 +28,7 @@
   <!-- Status view -->
   <string id="StatusReady" scope="glance">Ready</string>
   <string id="StatusNoUrl" scope="glance">No URL set</string>
+  <string id="StatusBadUrl" scope="glance">URL must be https</string>
   <string id="StatusOff" scope="glance">Disabled</string>
   <string id="StatusUnsupported" scope="glance">Not supported</string>
   <string id="StatusNever" scope="glance">No events yet</string>
@@ -41,4 +42,16 @@
   <string id="SendOk" scope="glance">Delivered</string>
   <string id="SendFailed" scope="glance">Failed</string>
   <string id="NoPhone">No phone connection</string>
+  <string id="ConfirmClear">Discard queued events?</string>
+
+  <!-- Relative times. Held as resources rather than inlined so that adding a
+       language back is a resource change and not a code change. -->
+  <string id="AgoJustNow">just now</string>
+  <string id="AgoMinutes">$1$m ago</string>
+  <string id="AgoHours">$1$h ago</string>
+  <string id="AgoDays">$1$d ago</string>
+
+  <!-- Settings validation, shown by Garmin Connect Mobile. -->
+  <string id="ErrUrlRequired">Enter the https:// URL of your own endpoint</string>
+  <string id="ErrHeartbeatRange">Between 5 and 1440 minutes</string>
 </strings>

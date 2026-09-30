@@ -70,7 +70,36 @@ class Config {
 
     //! Master switch, plus the one setting without which nothing can work.
     static function isUsable() as Lang.Boolean {
-        return getBool("enabled", true) && (url().length() > 0);
+        return getBool("enabled", true) && urlIsValid();
+    }
+
+    //! True when the URL is one a watch will actually accept.
+    //!
+    //! Garmin requires TLS on device, and the commonest first-run mistake is
+    //! typing a bare host: that left the status screen reporting Ready while
+    //! nothing was ever delivered. Plain http on loopback stays allowed because
+    //! it is the documented simulator test loop - see docs/BUILD.md and
+    //! examples/receiver.py - and no real watch can reach loopback anyway.
+    static function urlIsValid() as Lang.Boolean {
+        var u = url();
+        if (startsWith(u, "https://")) {
+            return u.length() > 8;
+        }
+        return startsWith(u, "http://localhost") || startsWith(u, "http://127.0.0.1");
+    }
+
+    //! Case-insensitive, because a phone keyboard capitalises the first letter
+    //! by default and "Https://..." is a perfectly valid URL that must not be
+    //! reported as the wrong scheme. Only the prefix is lowercased; the rest of
+    //! a URL is case-sensitive.
+    //!
+    //! substring() throws Out of Bounds rather than clamping when the range
+    //! runs past the end, so the length has to be checked first.
+    hidden static function startsWith(s as Lang.String, prefix as Lang.String) as Lang.Boolean {
+        if (s.length() < prefix.length()) {
+            return false;
+        }
+        return s.substring(0, prefix.length()).toLower().equals(prefix);
     }
 
     static function url() as Lang.String {
@@ -130,7 +159,7 @@ class Config {
     //! True when a background temporal event is needed at all: either the user
     //! wants heartbeats, or the retry queue needs a periodic chance to drain.
     static function needsTemporalEvent() as Lang.Boolean {
-        return eventEnabled("ev_heartbeat") or getBool("queue_enabled", true);
+        return eventEnabled("ev_heartbeat") || getBool("queue_enabled", true);
     }
 
     static function includeLocation() as Lang.Boolean {

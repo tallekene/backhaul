@@ -42,6 +42,9 @@ class BackhaulGlanceView extends WatchUi.GlanceView {
         if (Config.url().length() == 0) {
             return WatchUi.loadResource(Rez.Strings.StatusNoUrl) as Lang.String;
         }
+        if (!Config.urlIsValid()) {
+            return WatchUi.loadResource(Rez.Strings.StatusBadUrl) as Lang.String;
+        }
 
         var queued = EventQueue.size();
         if (queued > 0) {
