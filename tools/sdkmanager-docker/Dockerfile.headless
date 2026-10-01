@@ -1,0 +1,14 @@
+# The simulator container from Dockerfile, plus a virtual X server so it can be
+# driven by script. The host compositor will not hand keyboard focus to an
+# XWayland window, so xdotool cannot drive sim.sh's simulator; on Xvfb there is
+# no compositor and no window manager in the way. Built by sim-headless.sh.
+FROM ciq-sdkmanager
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        xvfb \
+        x11-utils \
+        xdotool \
+        imagemagick \
+    && rm -rf /var/lib/apt/lists/*
+
+ENTRYPOINT []
