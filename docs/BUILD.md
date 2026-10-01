@@ -105,12 +105,29 @@ links the same EOL library as the SDK Manager. Use the container instead:
 ```
 
 The prg has to live under the project directory, because that is what the
-container mounts. Two further limits, both found the hard way: the simulator
-accepts only one `run` per container lifetime, so restart it between tests, and
-the simulator opens on the *glance* view for an app that has one - you have to
-press START on the device to reach the app itself, which no amount of `xdotool`
-will do for you, because the compositor will not hand focus to the XWayland
-window.
+container mounts. The simulator accepts only one `run` per container lifetime,
+so restart it between tests.
+
+That window cannot be driven by script: the host compositor will not hand
+keyboard focus to an XWayland window, so `xdotool` input never arrives. To
+script it - screenshots, button presses - run it on a virtual display instead:
+
+```bash
+./tools/sdkmanager-docker/sim-headless.sh start
+./tools/sdkmanager-docker/sim-headless.sh run bin/backhaul.prg fenix7x &
+./tools/sdkmanager-docker/sim-headless.sh xdo mousemove 220 300 click 1
+./tools/sdkmanager-docker/sim-headless.sh shot bin/sim.png
+./tools/sdkmanager-docker/sim-headless.sh stop
+```
+
+The script's header covers its traps. The one that shapes any screenshot: the
+simulator opens an app that has a glance *on the glance*, and START does not
+open the app from there. That is the simulator, not input - the store
+screenshots of the status view came from a staged build without
+`getGlanceView()`.
+
+The simulator's own web requests never reached a receiver on the host, from
+either container, so delivery is only verifiable on a real watch.
 
 ## 4. Run it on the watch
 
