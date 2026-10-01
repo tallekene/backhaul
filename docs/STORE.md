@@ -115,10 +115,44 @@ that most likely ends with a $100 invoice and four sales.
 
 ## Submission checklist
 
-- [ ] `./build.sh export` produces `bin/backhaul.iq`
-- [ ] Back up `~/.config/garmin/developer_key.der` — losing it means you can
+- [x] `./build.sh export` produces `bin/backhaul.iq`
+- [x] Back up `~/.config/garmin/developer_key.der` — losing it means you can
       never update the published app
-- [ ] Privacy policy hosted at a stable public URL
-- [ ] Store description states the self-hosted-endpoint requirement up front
-- [ ] Screenshots from the simulator for a round and a rectangular device
-- [ ] Device list in the manifest matches what you actually tested
+- [x] Privacy policy hosted at a stable public URL
+- [x] Store description states the self-hosted-endpoint requirement up front
+- [x] Screenshots from the simulator for a round and a rectangular device
+- [ ] Device list in the manifest matches what you actually tested — it does
+      not, and cannot: 1.0.0 was run on a real fēnix 7X only, plus the
+      simulator for the fēnix 7X, Venu Sq 2 and the 32 KB-heap fēnix 6 Pro
+      (BACKHAUL-4). Garmin does not require it.
+
+## Submitted — 1.0.0, 2026-10-01
+
+Listing: https://apps.garmin.com/apps/fa818958-2f59-434d-9683-e47e82ad56da —
+Garmin's listing id, which is not the manifest app id `37f279b8…`. Free, category
+Tools, developer display name **Tallekene**. The text and metadata as submitted
+are in [STORE-LISTING.md](STORE-LISTING.md), the screen images in
+[screenshots/](screenshots/), and the cover in `art/cover-500x500.png`.
+
+The developer dashboard is at https://apps.garmin.com/developer/dashboard (not
+`/developer`, which is a 404). Things it does that cost time:
+
+- **The developer display name rejects non-ASCII.** "Tallekene OÜ" leaves Submit
+  disabled while the error lists only punctuation. The name also shows on any
+  review the account leaves on other apps.
+- **The description rejects `<` and `>`**, so no `device > Settings` paths. The
+  error appears under the field, not by the disabled Submit button.
+- **A cover image (500×500, under 300 KB) is required** and is not mentioned
+  until the form. Screen images must be under 150 KB.
+- **"Signature check failed" beside "Status: Verified" on a first upload is
+  benign.** The store compares the key against the *previous* upload of the
+  app id, and there is none. Verified locally: the `.iq` is a 7z whose
+  `dev_key.pub` is our key and whose `manifest.sig2` verifies with SHA-256. On
+  every later upload this check is the one that matters — a different key is
+  rejected.
+- **"Sorry, this page is currently unavailable"** after sign-in was a Garmin
+  backend outage, not a geo block: the same Cloudflare edge served the page
+  shell while its `/api/` returned 503. `https://apps.garmin.com/cdn-cgi/trace`
+  shows the country Garmin sees you in.
+- Clicking Continue after attaching the file is what accepts the Developer
+  License Agreement — there is no separate step.
